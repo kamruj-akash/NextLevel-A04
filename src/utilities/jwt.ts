@@ -7,15 +7,6 @@ interface IJwtPayload {
   role: string;
 }
 
-// interface IJwtVerify {
-//   id: string;
-//   name: string;
-//   email: string;
-//   role: string;
-//   iat: number;
-//   exp: number;
-// }
-
 const createToken = (payload: IJwtPayload, secret: string, exp: string) => {
   const token = jwt.sign(payload, secret, {
     expiresIn: exp,

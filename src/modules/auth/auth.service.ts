@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
-import { IRegisterUser } from "./auth.interface";
+import { createToken } from "../../utilities/jwt";
+import { ILogin, IRegisterUser } from "./auth.interface";
 
 const regUserDb = async (payload: IRegisterUser) => {
   const { email, password, name, phone } = payload;
@@ -29,8 +30,46 @@ const regUserDb = async (payload: IRegisterUser) => {
   return userData;
 };
 
-const loginUserDb = async () => {
-  
+const loginUserDb = async (payload: ILogin) => {
+  const { email, password } = payload;
+  const userData = await prisma.user.findFirstOrThrow({
+    where: { email },
+  });
+
+  const isPassVerified = await bcrypt.compare(password, userData.password);
+  if (!isPassVerified) {
+    throw new Error("Wrong Password");
+  }
+
+  const jwtPayload = {
+    id: userData.id,
+    name: userData.name,
+    email: userData.email,
+    role: userData.role,
+  };
+
+  const refreshToken = createToken(
+    jwtPayload,
+    config.JWT_REFRESH_SECRET,
+    config.JWT_REFRESH_EXPIRES_IN,
+  );
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.JWT_ACCESS_SECRET,
+    config.JWT_ACCESS_EXPIRES_IN,
+  );
+
+  return { refreshToken, accessToken };
 };
 
-export { regUserDb };
+const getInfoDb = async (email: string) => {
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: { email },
+    omit: { password: true },
+  });
+
+  return userData;
+};
+
+export { getInfoDb, loginUserDb, regUserDb };
