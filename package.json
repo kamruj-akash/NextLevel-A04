@@ -12,7 +12,6 @@
   },
   "license": "ISC",
   "author": "kamruj-akash <source.akash@gmail.com>",
-  "type": "module",
   "main": "server.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",
