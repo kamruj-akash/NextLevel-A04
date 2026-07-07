@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { Role } from "../../generated/prisma/enums";
+import { Role, Status } from "../../generated/prisma/enums";
 import config from "../config";
+import { prisma } from "../lib/prisma";
 import { catchAsync } from "../utilities/catchAsync";
 import { verifyToken } from "../utilities/jwt";
 import { sendResponse } from "../utilities/sendResponse";
@@ -31,6 +32,11 @@ export const auth = (...roles: Role[]) =>
 
     if (!roles.includes(role)) {
       return sendResponse(res, "Forbidden!!!", null, 403);
+    }
+
+    const userData = await prisma.user.findUnique({ where: { id } });
+    if (!userData || userData.status === Status.SUSPENDED) {
+      return sendResponse(res, "Your Account is Suspended!", null, 403);
     }
 
     req.user = { email, id, name, role };

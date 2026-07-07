@@ -1,5 +1,8 @@
 export interface ISearchTerm {
+  search?: string;
   category?: string;
-  price?: string;
   brand?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  availability?: string;
 }

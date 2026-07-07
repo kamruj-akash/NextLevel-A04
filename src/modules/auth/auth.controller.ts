@@ -4,7 +4,7 @@ import { sendResponse } from "../../utilities/sendResponse";
 import { getInfoDb, loginUserDb, regUserDb } from "./auth.service";
 
 const regUser = catchAsync(async (req: Request, res: Response) => {
-  const result = regUserDb(req.body);
+  const result = await regUserDb(req.body);
   sendResponse(res, "User Registered Success, Please Login Now!", result, 201);
 });
 

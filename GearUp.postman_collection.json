@@ -1,0 +1,415 @@
+{
+  "info": {
+    "name": "GearUp API",
+    "description": "Rent Sports & Outdoor Gear Instantly.\n\n**How to use:**\n1. Set `baseUrl` variable (default: http://localhost:4000)\n2. Register a customer & a provider from the Auth folder\n3. Login — the access token is saved automatically into `accessToken` and used by all authorized requests\n4. To test role based endpoints, login with that role's account first (customer / provider / admin)\n\nIDs (gearId, orderId, categoryId, transactionId) are auto-captured from create responses.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "categoryId", "value": "" },
+    { "key": "gearId", "value": "" },
+    { "key": "orderId", "value": "" },
+    { "key": "paymentId", "value": "" },
+    { "key": "transactionId", "value": "" },
+    { "key": "userId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (Customer)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Customer\",\n  \"email\": \"customer@gearup.com\",\n  \"password\": \"pass1234\",\n  \"phone\": \"+8801700000001\",\n  \"role\": \"CUSTOMER\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Register (Provider)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Provider\",\n  \"email\": \"provider@gearup.com\",\n  \"password\": \"pass1234\",\n  \"phone\": \"+8801700000002\",\n  \"role\": \"PROVIDER\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data?.accessToken) {",
+                  "    pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "    console.log('accessToken saved to collection variable');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@gearup.com\",\n  \"password\": \"pass1234\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Get My Info",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gear (Public)",
+      "item": [
+        {
+          "name": "Get All Gear",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/gear?search=&category=&brand=&minPrice=&maxPrice=&availability=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "gear"],
+              "query": [
+                { "key": "search", "value": "", "description": "search in name/description", "disabled": true },
+                { "key": "category", "value": "", "description": "category name or slug", "disabled": true },
+                { "key": "brand", "value": "", "disabled": true },
+                { "key": "minPrice", "value": "", "disabled": true },
+                { "key": "maxPrice", "value": "", "disabled": true },
+                { "key": "availability", "value": "true", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Gear Details",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/gear/{{gearId}}", "host": ["{{baseUrl}}"], "path": ["api", "gear", "{{gearId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/categories", "host": ["{{baseUrl}}"], "path": ["api", "categories"] }
+          }
+        },
+        {
+          "name": "Create Category (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data?.id) pm.collectionVariables.set('categoryId', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Camping\",\n  \"description\": \"Camping and outdoor gear\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/categories", "host": ["{{baseUrl}}"], "path": ["api", "categories"] }
+          }
+        },
+        {
+          "name": "Update Category (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Camping & Hiking\",\n  \"description\": \"All camping and hiking gear\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/categories/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["api", "categories", "{{categoryId}}"] }
+          }
+        },
+        {
+          "name": "Delete Category (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/categories/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["api", "categories", "{{categoryId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rental Orders",
+      "item": [
+        {
+          "name": "Create Rental Order (Customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data?.id) pm.collectionVariables.set('orderId', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rentalStartDate\": \"2026-07-10\",\n  \"rentalEndDate\": \"2026-07-13\",\n  \"items\": [\n    {\n      \"itemId\": \"{{gearId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/rentals", "host": ["{{baseUrl}}"], "path": ["api", "rentals"] }
+          }
+        },
+        {
+          "name": "Get My Rental Orders (Customer)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/rentals", "host": ["{{baseUrl}}"], "path": ["api", "rentals"] }
+          }
+        },
+        {
+          "name": "Get Rental Order Details",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/rentals/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["api", "rentals", "{{orderId}}"] }
+          }
+        },
+        {
+          "name": "Cancel Rental Order (Customer)",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/api/rentals/{{orderId}}/cancel", "host": ["{{baseUrl}}"], "path": ["api", "rentals", "{{orderId}}", "cancel"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments (Stripe)",
+      "item": [
+        {
+          "name": "Create Payment Session (Customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data?.payment) {",
+                  "    pm.collectionVariables.set('paymentId', res.data.payment.id);",
+                  "    pm.collectionVariables.set('transactionId', res.data.payment.transactionId);",
+                  "    console.log('Open this URL to pay:', res.data.paymentUrl);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rentalOrderId\": \"{{orderId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/payments/create", "host": ["{{baseUrl}}"], "path": ["api", "payments", "create"] },
+            "description": "Returns a Stripe Checkout `paymentUrl` — open it in the browser and pay with test card 4242 4242 4242 4242, then call Confirm Payment."
+          }
+        },
+        {
+          "name": "Confirm Payment (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionId\": \"{{transactionId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/payments/confirm", "host": ["{{baseUrl}}"], "path": ["api", "payments", "confirm"] },
+            "description": "Verifies the Stripe checkout session. If paid, payment becomes COMPLETED and order becomes PAID. (The Stripe webhook does the same automatically.)"
+          }
+        },
+        {
+          "name": "Get My Payment History (Customer)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/payments", "host": ["{{baseUrl}}"], "path": ["api", "payments"] }
+          }
+        },
+        {
+          "name": "Get Payment Details",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/payments/{{paymentId}}", "host": ["{{baseUrl}}"], "path": ["api", "payments", "{{paymentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Provider",
+      "item": [
+        {
+          "name": "Add Gear",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data?.id) pm.collectionVariables.set('gearId', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"4 Person Tent\",\n  \"description\": \"Waterproof dome tent for 4 people\",\n  \"brand\": \"Coleman\",\n  \"images\": [\"https://example.com/tent.jpg\"],\n  \"pricePerDay\": 15.5,\n  \"stock\": 5,\n  \"categoryId\": \"{{categoryId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/provider/gear", "host": ["{{baseUrl}}"], "path": ["api", "provider", "gear"] }
+          }
+        },
+        {
+          "name": "Update Gear",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pricePerDay\": 18,\n  \"stock\": 10,\n  \"isAvailable\": true\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/provider/gear/{{gearId}}", "host": ["{{baseUrl}}"], "path": ["api", "provider", "gear", "{{gearId}}"] }
+          }
+        },
+        {
+          "name": "Remove Gear",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/provider/gear/{{gearId}}", "host": ["{{baseUrl}}"], "path": ["api", "provider", "gear", "{{gearId}}"] },
+            "description": "Gear with rental history is soft-removed (marked unavailable, stock 0) instead of hard deleted."
+          }
+        },
+        {
+          "name": "Get Incoming Orders",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/provider/orders", "host": ["{{baseUrl}}"], "path": ["api", "provider", "orders"] }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/provider/orders/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["api", "provider", "orders", "{{orderId}}"] },
+            "description": "Allowed transitions: PLACED → CONFIRMED, PAID → PICKED_UP, PICKED_UP → RETURNED"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create Review (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": \"{{gearId}}\",\n  \"rentalOrderId\": \"{{orderId}}\",\n  \"rating\": 5,\n  \"comment\": \"Great tent, easy to set up!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/reviews", "host": ["{{baseUrl}}"], "path": ["api", "reviews"] },
+            "description": "Only allowed after the rental order status is RETURNED."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/users", "host": ["{{baseUrl}}"], "path": ["api", "admin", "users"] }
+          }
+        },
+        {
+          "name": "Update User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SUSPENDED\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "users", "{{userId}}"] },
+            "description": "status: ACTIVE | SUSPENDED"
+          }
+        },
+        {
+          "name": "Get All Gear Listings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/gear", "host": ["{{baseUrl}}"], "path": ["api", "admin", "gear"] }
+          }
+        },
+        {
+          "name": "Get All Rental Orders",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/rentals", "host": ["{{baseUrl}}"], "path": ["api", "admin", "rentals"] }
+          }
+        }
+      ]
+    }
+  ]
+}

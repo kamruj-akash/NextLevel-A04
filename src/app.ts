@@ -2,11 +2,15 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application, NextFunction, Request, Response } from "express";
 import config from "./config";
+import { adminRouter } from "./modules/admin/admin.route";
 import { authRouter } from "./modules/auth/auth.route";
+import { categoryRouter } from "./modules/category/category.route";
 import { gearRouter } from "./modules/gear/gear.route";
+import { stripeWebhook } from "./modules/payment/payment.controller";
+import { paymentRouter } from "./modules/payment/payment.route";
 import { providerRouter } from "./modules/provider/provider.route";
-
-// import bcrypt from "bcryptjs";
+import { rentalRouter } from "./modules/rental/rental.route";
+import { reviewRouter } from "./modules/review/review.route";
 
 const app: Application = express();
 
@@ -15,6 +19,13 @@ app.use(
     origin: config.APP_URL,
     credentials: true,
   }),
+);
+
+// stripe webhook needs raw body, must stay before express.json()
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhook,
 );
 
 app.use(express.json());
@@ -35,7 +46,12 @@ app.get("/", async (req: Request, res: Response) => {
 // all routes
 app.use("/api/auth", authRouter);
 app.use("/api/gear", gearRouter);
+app.use("/api/categories", categoryRouter);
+app.use("/api/rentals", rentalRouter);
+app.use("/api/payments", paymentRouter);
 app.use("/api/provider", providerRouter);
+app.use("/api/reviews", reviewRouter);
+app.use("/api/admin", adminRouter);
 
 // not found route
 app.use((req: Request, res: Response) => {

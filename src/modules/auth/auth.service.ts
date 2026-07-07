@@ -1,11 +1,12 @@
 import bcrypt from "bcrypt";
+import { Role } from "../../../generated/prisma/enums";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { createToken } from "../../utilities/jwt";
 import { ILogin, IRegisterUser } from "./auth.interface";
 
 const regUserDb = async (payload: IRegisterUser) => {
-  const { email, password, name, phone } = payload;
+  const { email, password, name, phone, role } = payload;
   const hashPassword = await bcrypt.hash(
     password,
     Number(config.BCRYPT_SALT_ROUNDS),
@@ -17,6 +18,7 @@ const regUserDb = async (payload: IRegisterUser) => {
       password: hashPassword,
       name,
       phone,
+      role: role === "PROVIDER" ? Role.PROVIDER : Role.CUSTOMER,
     },
   });
 

@@ -1,10 +1,9 @@
 import { Router } from "express";
-import { getAllGear } from "./gear.controller";
+import { getAllGear, getGearById } from "./gear.controller";
 
 const router = Router();
 
 router.get("/", getAllGear);
-// router.get("/:id");
-// router.get("/categories");
+router.get("/:id", getGearById);
 
 export const gearRouter = router;
