@@ -3,7 +3,8 @@ import cors from "cors";
 import express, { Application, NextFunction, Request, Response } from "express";
 import config from "./config";
 import { authRouter } from "./modules/auth/auth.route";
-import { gearRouter } from "./modules/gear/auth.route";
+import { gearRouter } from "./modules/gear/gear.route";
+import { providerRouter } from "./modules/provider/provider.route";
 
 // import bcrypt from "bcryptjs";
 
@@ -34,6 +35,7 @@ app.get("/", async (req: Request, res: Response) => {
 // all routes
 app.use("/api/auth", authRouter);
 app.use("/api/gear", gearRouter);
+app.use("/api/provider", providerRouter);
 
 // not found route
 app.use((req: Request, res: Response) => {

@@ -7,7 +7,6 @@ model Item {
 
   pricePerDay    Decimal  @default(0)
   stock          Int      @default(0)
-  specifications Json?
   isAvailable    Boolean  @default(true)
   avgRating      Decimal?
 

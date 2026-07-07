@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../utilities/catchAsync";
 import { sendResponse } from "../../utilities/sendResponse";
-import { getGearDb } from "./auth.service";
+import { getGearDb } from "./gear.service";
 import { ISearchTerm } from "./gear.interface";
 
 const getAllGear = catchAsync(async (req: Request, res: Response) => {

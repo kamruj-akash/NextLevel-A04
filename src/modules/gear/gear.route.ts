@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllGear } from "./auth.controller";
+import { getAllGear } from "./gear.controller";
 
 const router = Router();
 
